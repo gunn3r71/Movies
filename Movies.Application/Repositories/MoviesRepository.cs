@@ -4,7 +4,7 @@ namespace Movies.Application.Repositories
 {
     public class MoviesRepository : IMoviesRepository
     {
-        private readonly List<Movie> _movies = [];
+        private readonly List<Movie> _movies = new();
 
         public Task<bool> CreateMovieAsync(Movie movie)
         {
@@ -13,16 +13,16 @@ namespace Movies.Application.Repositories
             return Task.FromResult(true);
         }
 
-        public Task DeleteMovieAsync(Guid id)
+        public Task<bool> DeleteMovieAsync(Guid id)
         {
             var movieIndex = _movies.FindIndex(movie => movie.Id == id);
 
-            if (movieIndex <= 0)
-                return Task.CompletedTask;
+            if (movieIndex < 0)
+                return Task.FromResult(false);
 
             _movies.RemoveAt(movieIndex);
 
-            return Task.CompletedTask;
+            return Task.FromResult(true);
         }
 
         public Task<Movie?> GetMovieAsync(Guid id) =>
