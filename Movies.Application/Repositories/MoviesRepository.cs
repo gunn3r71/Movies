@@ -1,0 +1,46 @@
+﻿using Movies.Application.Models;
+
+namespace Movies.Application.Repositories
+{
+    public class MoviesRepository : IMoviesRepository
+    {
+        private readonly List<Movie> _movies = [];
+
+        public Task<bool> CreateMovieAsync(Movie movie)
+        {
+            _movies.Add(movie);
+
+            return Task.FromResult(true);
+        }
+
+        public Task DeleteMovieAsync(Guid id)
+        {
+            var movieIndex = _movies.FindIndex(movie => movie.Id == id);
+
+            if (movieIndex <= 0)
+                return Task.CompletedTask;
+
+            _movies.RemoveAt(movieIndex);
+
+            return Task.CompletedTask;
+        }
+
+        public Task<Movie?> GetMovieAsync(Guid id) =>
+            Task.FromResult(_movies.SingleOrDefault(movie => movie.Id == id));
+
+        public Task<IEnumerable<Movie>> GetMoviesAsync() =>
+            Task.FromResult(_movies.AsEnumerable());
+
+        public Task<bool> UpdateMovieAsync(Movie movie)
+        {
+            var existingMovieIndex = _movies.FindIndex(m => m.Id == movie.Id);
+
+            if (existingMovieIndex < 0)
+                return Task.FromResult(false);
+
+            _movies[existingMovieIndex] = movie;
+
+            return Task.FromResult(true);
+        }
+    }
+}
