@@ -1,6 +1,8 @@
-﻿namespace Movies.Application.Models
+﻿using System.Text.RegularExpressions;
+
+namespace Movies.Application.Models
 {
-    public class Movie
+    public partial class Movie
     {
         public Movie()
         {
@@ -15,7 +17,20 @@
         public Guid Id { get; private set; }
         public required string Title { get; set; }
         public required string Description { get; set; }
+        public string Slug => GenerateSlug();
         public required int YearOfRelease { get; set; }
-        public List<string> Genres { get; private set; } = new();
+        public List<string> Genres { get; private set; } = [];
+
+        private string GenerateSlug()
+        {
+            var sluggedTitle = SlugRegex().Replace(Title, string.Empty)
+                .Replace(' ', '-')
+                .ToLower();
+
+            return $"{sluggedTitle}-{YearOfRelease}";
+        }
+
+        [GeneratedRegex(@"[^0-9A-Za-z _-]", RegexOptions.NonBacktracking, 10)]
+        private static partial Regex SlugRegex();
     }
 }

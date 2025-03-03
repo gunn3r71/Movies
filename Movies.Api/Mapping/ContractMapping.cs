@@ -28,6 +28,7 @@ namespace Movies.Api.Mapping
                 Title = movie.Title,
                 Description = movie.Description,
                 YearOfRelease = movie.YearOfRelease,
+                Slug = movie.Slug,
                 Genres = movie.Genres
             };
         }

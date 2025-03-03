@@ -4,7 +4,12 @@ namespace Movies.Application.Repositories
 {
     public class MoviesRepository : IMoviesRepository
     {
-        private readonly List<Movie> _movies = new();
+        private readonly List<Movie> _movies = [];
+
+        public async Task<Movie?> GetMovieBySlugAsync(string slug)
+        {
+            return await Task.FromResult(_movies.SingleOrDefault(x => x.Slug.Equals(slug, StringComparison.InvariantCultureIgnoreCase)));
+        }
 
         public Task<bool> CreateMovieAsync(Movie movie)
         {
