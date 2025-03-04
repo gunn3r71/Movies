@@ -17,7 +17,7 @@ public class DatabaseInitializer
         using var connection = await _connectionFactory.CreateConnectionAsync();
 
         await connection.ExecuteAsync("""
-                                      CREATE TABLE movies(
+                                      CREATE TABLE IF NOT EXISTS movies(
                                         id UUID NOT NULL PRIMARY KEY,
                                         title TEXT NOT NULL,
                                         description TEXT NOT NULL,
