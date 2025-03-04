@@ -2,7 +2,7 @@
 
 namespace Movies.Application.Repositories
 {
-    public class MoviesRepository : IMoviesRepository
+    public class MoviesInMemoryRepository : IMoviesRepository
     {
         private readonly List<Movie> _movies = [];
 
