@@ -30,6 +30,11 @@ namespace Movies.Application.Repositories
             return Task.FromResult(true);
         }
 
+        public Task<bool> ExistsAsync(Guid id)
+        {
+            throw new NotImplementedException();
+        }
+
         public Task<Movie?> GetMovieAsync(Guid id) =>
             Task.FromResult(_movies.SingleOrDefault(movie => movie.Id == id));
 

@@ -22,8 +22,7 @@ public class DatabaseInitializer
                                         title TEXT NOT NULL,
                                         description TEXT NOT NULL,
                                         slug TEXT NOT NULL,
-                                        year_of_release INTEGER NOT NULL,
-                                        genres TEXT[] NOT NULL
+                                        year_of_release INTEGER NOT NULL
                                       );
                                       """);
 
@@ -32,6 +31,13 @@ public class DatabaseInitializer
                                         IF NOT EXISTS movies_slug_idx 
                                         ON movies
                                         using btree(slug);
+                                      """);
+
+        await connection.ExecuteAsync("""
+                                      CREATE TABLE IF NOT EXISTS genres(
+                                          movie_id UUID REFERENCES movies(id),
+                                          name TEXT NOT NULL
+                                      )
                                       """);
     }
 }

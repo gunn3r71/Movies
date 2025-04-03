@@ -10,5 +10,6 @@ namespace Movies.Application.Repositories
         Task<bool> CreateMovieAsync(Movie movie);
         Task<bool> UpdateMovieAsync(Movie movie);
         Task<bool> DeleteMovieAsync(Guid id);
+        Task<bool> ExistsAsync(Guid id);
     }
 }

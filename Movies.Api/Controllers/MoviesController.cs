@@ -46,7 +46,7 @@ namespace Movies.Api.Controllers
             if (!result)
                 return BadRequest();
 
-            return CreatedAtAction(nameof(Get), new { id = movie.Id }, movie.MapToResponse());
+            return CreatedAtAction(nameof(Get), new { id = movie.Id.ToString() }, movie.MapToResponse());
         }
 
         [HttpPut(ApiEndpoints.Movies.Update)]
