@@ -22,33 +22,57 @@ public class MoviesRepository : IMoviesRepository
 
     public async Task<IEnumerable<Movie>> GetMoviesAsync()
     {
-        const string sql = "SELECT * FROM Movies";
+        const string sql = """
+                           SELECT mvs.*, string_agg(g.name, ',') as genres FROM Movies mvs
+                            LEFT JOIN genres g
+                                ON mvs.Id = g.movie_id
+                            GROUP BY mvs.id;
+                           """;
 
         using var connection = await _connectionFactory.CreateConnectionAsync();
         
-        var result = await connection.QueryAsync<Movie>(sql);
+        var queryResult = await connection.QueryAsync(sql);
 
-        return result;
+        return queryResult.Select(x =>
+        {
+            Movie? movie = ConvertQueryToMovie(x);
+            
+            return movie;
+        });
     }
 
     public async Task<Movie?> GetMovieAsync(Guid id)
     {
-        const string sql = "SELECT * FROM Movies WHERE Id = @Id";
+        const string sql = """
+                           SELECT mvs.*, string_agg(g.name, ',') as genres 
+                           FROM Movies mvs
+                           LEFT JOIN genres g ON mvs.Id = g.movie_id
+                           WHERE Id = @Id
+                           GROUP BY mvs.id;
+                           """;
 
         using var connection = await _connectionFactory.CreateConnectionAsync();
         
-        var result = await connection.QuerySingleOrDefaultAsync<Movie>(sql, new { Id = id });
-
-        return result;
+        var queryResult = await connection.QuerySingleOrDefaultAsync(sql, new { Id = id });
+        
+        return ConvertQueryToMovie(queryResult);
     }
 
     public async Task<Movie?> GetMovieBySlugAsync(string slug)
     {
-        const string sql = "SELECT * FROM Movies WHERE Slug = @Slug";
-        
+        const string sql = """
+                           SELECT mvs.*, string_agg(g.name, ',') as genres 
+                           FROM Movies mvs
+                           LEFT JOIN genres g ON mvs.id = g.movie_id
+                           WHERE mvs.Slug = @Slug
+                           GROUP BY mvs.id;
+                           """;
+
         using var connection = await _connectionFactory.CreateConnectionAsync();
         
-        return await connection.QuerySingleAsync<Movie>(sql, new { Slug = slug });
+        var queryResult = await connection.QuerySingleOrDefaultAsync(sql, new { Slug = slug });
+        
+        return ConvertQueryToMovie(queryResult);
     }
 
     public async Task<bool> CreateMovieAsync(Movie movie)
@@ -89,7 +113,7 @@ public class MoviesRepository : IMoviesRepository
         const string updateMovieCommand = """
                                           UPDATE movies 
                                           SET 
-                                            title = @Name,
+                                            title = @Title,
                                             slug = @Slug,
                                             description = @Description,
                                             year_of_release = @YearOfRelease
@@ -121,7 +145,7 @@ public class MoviesRepository : IMoviesRepository
 
         await connection.ExecuteAsync(DeleteGenresCommand, new { MovieId = id });
         
-        var result = await connection.ExecuteAsync(new CommandDefinition(deleteMovieCommand, id));
+        var result = await connection.ExecuteAsync(new CommandDefinition(deleteMovieCommand, new { Id = id }));
             
         transaction.Commit();
 
@@ -137,5 +161,22 @@ public class MoviesRepository : IMoviesRepository
         var result = await connection.QuerySingleOrDefaultAsync<int>(new CommandDefinition(query, new { Id = id }));
         
         return result > 0;
+    }
+
+    private static Movie? ConvertQueryToMovie(dynamic? queryResult)
+    {
+        if (queryResult == null)
+            return null;
+
+        var movie = new Movie(queryResult.id)
+        {
+            Title = queryResult.title,
+            Description = queryResult.description,
+            YearOfRelease = queryResult.year_of_release
+        };
+        
+        movie.Genres.AddRange(queryResult.genres.Split(','));
+
+        return movie;
     }
 }
