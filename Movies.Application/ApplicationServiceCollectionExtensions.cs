@@ -2,6 +2,7 @@
 using Movies.Application.Database.Factory;
 using Movies.Application.Database.Initializers;
 using Movies.Application.Repositories;
+using Movies.Application.Services;
 
 namespace Movies.Application
 {
@@ -10,6 +11,7 @@ namespace Movies.Application
         public static IServiceCollection AddApplication(this IServiceCollection services)
         {
             services.AddScoped<IMoviesRepository, MoviesRepository>();
+            services.AddSingleton<IMoviesService, MoviesService>();
             
             return services;
         }

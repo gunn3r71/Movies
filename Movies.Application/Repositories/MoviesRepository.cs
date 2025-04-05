@@ -17,10 +17,11 @@ public class MoviesRepository : IMoviesRepository
 
     public MoviesRepository(IDbConnectionFactory connectionFactory)
     {
+        ArgumentNullException.ThrowIfNull(connectionFactory, nameof(connectionFactory));
         _connectionFactory = connectionFactory;
     }
 
-    public async Task<IEnumerable<Movie>> GetMoviesAsync()
+    public async Task<IEnumerable<Movie>> GetAsync()
     {
         const string sql = """
                            SELECT mvs.*, string_agg(g.name, ',') as genres FROM Movies mvs
@@ -41,41 +42,13 @@ public class MoviesRepository : IMoviesRepository
         });
     }
 
-    public async Task<Movie?> GetMovieAsync(Guid id)
-    {
-        const string sql = """
-                           SELECT mvs.*, string_agg(g.name, ',') as genres 
-                           FROM Movies mvs
-                           LEFT JOIN genres g ON mvs.Id = g.movie_id
-                           WHERE Id = @Id
-                           GROUP BY mvs.id;
-                           """;
+    public async Task<Movie?> GetByIdAsync(Guid id) => 
+        await GetByConditionAsync("mvs.id", new { id = id });
 
-        using var connection = await _connectionFactory.CreateConnectionAsync();
-        
-        var queryResult = await connection.QuerySingleOrDefaultAsync(sql, new { Id = id });
-        
-        return ConvertQueryToMovie(queryResult);
-    }
+    public async Task<Movie?> GetBySlugAsync(string slug) => 
+        await GetByConditionAsync("mvs.slug", new { slug = slug });
 
-    public async Task<Movie?> GetMovieBySlugAsync(string slug)
-    {
-        const string sql = """
-                           SELECT mvs.*, string_agg(g.name, ',') as genres 
-                           FROM Movies mvs
-                           LEFT JOIN genres g ON mvs.id = g.movie_id
-                           WHERE mvs.Slug = @Slug
-                           GROUP BY mvs.id;
-                           """;
-
-        using var connection = await _connectionFactory.CreateConnectionAsync();
-        
-        var queryResult = await connection.QuerySingleOrDefaultAsync(sql, new { Slug = slug });
-        
-        return ConvertQueryToMovie(queryResult);
-    }
-
-    public async Task<bool> CreateMovieAsync(Movie movie)
+    public async Task<bool> CreateAsync(Movie movie)
     {
         const string insertMovieCommand = """
                                           INSERT INTO movies (id, title, description, slug, year_of_release)
@@ -108,7 +81,7 @@ public class MoviesRepository : IMoviesRepository
         return true;
     }
 
-    public async Task<bool> UpdateMovieAsync(Movie movie)
+    public async Task<bool> UpdateAsync(Movie movie)
     {
         const string updateMovieCommand = """
                                           UPDATE movies 
@@ -135,7 +108,7 @@ public class MoviesRepository : IMoviesRepository
         return result > 0;
     }
 
-    public async Task<bool> DeleteMovieAsync(Guid id)
+    public async Task<bool> DeleteAsync(Guid id)
     {
         const string deleteMovieCommand = "DELETE FROM movies WHERE id = @Id;";
         
@@ -161,6 +134,26 @@ public class MoviesRepository : IMoviesRepository
         var result = await connection.QuerySingleOrDefaultAsync<int>(new CommandDefinition(query, new { Id = id }));
         
         return result > 0;
+    }
+
+    private async Task<Movie?> GetByConditionAsync(string sqlCondition, object parameters)
+    {
+        var sql = $"""
+                   SELECT mvs.*, string_agg(g.name, ',') as genres 
+                   FROM Movies mvs
+                   LEFT JOIN genres g ON mvs.id = g.movie_id
+                   WHERE {sqlCondition}
+                   GROUP BY mvs.id;
+                   """;
+        
+        ArgumentException.ThrowIfNullOrEmpty(sqlCondition, nameof(sqlCondition));
+        ArgumentNullException.ThrowIfNull(parameters, nameof(parameters));
+        
+        using var connection = await _connectionFactory.CreateConnectionAsync();
+        
+        var queryResult = await connection.QuerySingleOrDefaultAsync(sql, parameters);
+        
+        return ConvertQueryToMovie(queryResult);
     }
 
     private static Movie? ConvertQueryToMovie(dynamic? queryResult)

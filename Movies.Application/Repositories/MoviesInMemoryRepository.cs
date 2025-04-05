@@ -2,23 +2,23 @@
 
 namespace Movies.Application.Repositories
 {
-    public class MoviesInMemoryRepository : IMoviesRepository
+    public class MoviesInMemoryService : IMoviesRepository
     {
         private readonly List<Movie> _movies = [];
 
-        public async Task<Movie?> GetMovieBySlugAsync(string slug)
+        public async Task<Movie?> GetBySlugAsync(string slug)
         {
             return await Task.FromResult(_movies.SingleOrDefault(x => x.Slug.Equals(slug, StringComparison.InvariantCultureIgnoreCase)));
         }
 
-        public Task<bool> CreateMovieAsync(Movie movie)
+        public Task<bool> CreateAsync(Movie movie)
         {
             _movies.Add(movie);
 
             return Task.FromResult(true);
         }
 
-        public Task<bool> DeleteMovieAsync(Guid id)
+        public Task<bool> DeleteAsync(Guid id)
         {
             var movieIndex = _movies.FindIndex(movie => movie.Id == id);
 
@@ -33,13 +33,13 @@ namespace Movies.Application.Repositories
         public Task<bool> ExistsAsync(Guid id) => 
             Task.FromResult(_movies.Any(x => x.Id.Equals(id)));
 
-        public Task<Movie?> GetMovieAsync(Guid id) =>
+        public Task<Movie?> GetByIdAsync(Guid id) =>
             Task.FromResult(_movies.SingleOrDefault(movie => movie.Id == id));
 
-        public Task<IEnumerable<Movie>> GetMoviesAsync() =>
+        public Task<IEnumerable<Movie>> GetAsync() =>
             Task.FromResult(_movies.AsEnumerable());
 
-        public Task<bool> UpdateMovieAsync(Movie movie)
+        public Task<bool> UpdateAsync(Movie movie)
         {
             var existingMovieIndex = _movies.FindIndex(m => m.Id == movie.Id);
 
