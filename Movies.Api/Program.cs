@@ -1,3 +1,4 @@
+using Movies.Api.Middlewares;
 using Movies.Application;
 using Movies.Application.Database.Initializers;
 
@@ -30,6 +31,8 @@ if (app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 
 app.UseAuthorization();
+
+app.UseMiddleware(typeof(ValidationErrorMiddleware));
 
 app.MapControllers();
 

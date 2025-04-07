@@ -1,6 +1,6 @@
 ﻿namespace Movies.Contracts.Responses
 {
-    public class MovieResponse
+    public sealed class MovieResponse
     {
         public Guid Id { get; set; }
         public required string Title { get; init; }
