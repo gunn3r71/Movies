@@ -31,7 +31,7 @@ namespace Movies.Api.Controllers
         [HttpGet(ApiEndpoints.Movies.GetAll)]
         public async Task<IActionResult> GetMoviesAsync(CancellationToken cancellationToken = default)
         {
-            var movies = await _service.GetAsync();
+            var movies = await _service.GetAsync(cancellationToken);
 
             return Ok(movies.MapToResponse());
         }
