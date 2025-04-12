@@ -27,7 +27,8 @@ public class MovieValidator : AbstractValidator<Movie>
             .LessThanOrEqualTo(DateTime.UtcNow.Year);
 
         RuleFor(m => m.Slug)
-            .MustAsync(IsValidSlugAsync);
+            .MustAsync(IsValidSlugAsync)
+            .WithMessage("Movie already exists.");
     }
 
     private async Task<bool> IsValidSlugAsync(Movie movie, string slug, CancellationToken cancellationToken = default)

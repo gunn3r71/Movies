@@ -43,10 +43,10 @@ public class MoviesRepository : IMoviesRepository
     }
 
     public async Task<Movie?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default) => 
-        await GetByConditionAsync("mvs.id", new { id = id }, cancellationToken);
+        await GetByConditionAsync("mvs.id = @Id", new { Id = id }, cancellationToken);
 
     public async Task<Movie?> GetBySlugAsync(string slug, CancellationToken cancellationToken = default) => 
-        await GetByConditionAsync("mvs.slug", new { slug = slug }, cancellationToken);
+        await GetByConditionAsync("mvs.slug = @Slug", new { Slug = slug }, cancellationToken);
 
     public async Task<bool> CreateAsync(Movie movie, CancellationToken cancellationToken = default)
     {

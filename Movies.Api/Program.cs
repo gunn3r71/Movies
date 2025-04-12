@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Localization;
 using Movies.Api.Middlewares;
 using Movies.Application;
 using Movies.Application.Database.Initializers;
@@ -27,6 +28,11 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+
+app.UseRequestLocalization(new RequestLocalizationOptions
+{
+    DefaultRequestCulture = new RequestCulture("en-US")
+});
 
 app.UseHttpsRedirection();
 
