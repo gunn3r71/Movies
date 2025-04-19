@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Movies.Api.Mapping;
 using Movies.Application.Services;
 using Movies.Contracts.Requests;
@@ -6,6 +7,7 @@ using Movies.Contracts.Requests;
 namespace Movies.Api.Controllers
 {
     [ApiController]
+    [Authorize]
     public class MoviesController : ControllerBase
     {
         private readonly IMoviesService _service;
