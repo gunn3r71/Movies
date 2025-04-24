@@ -21,7 +21,7 @@ public class MoviesRepository : IMoviesRepository
         _connectionFactory = connectionFactory;
     }
 
-    public async Task<IEnumerable<Movie>> GetAsync(CancellationToken cancellationToken = default)
+    public async Task<IEnumerable<Movie>> GetAsync(Guid? userId = null, CancellationToken cancellationToken = default)
     {
         const string sql = """
                            SELECT mvs.*, string_agg(g.name, ',') as genres FROM Movies mvs
@@ -42,11 +42,11 @@ public class MoviesRepository : IMoviesRepository
         });
     }
 
-    public async Task<Movie?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default) => 
-        await GetByConditionAsync("mvs.id = @Id", new { Id = id }, cancellationToken);
+    public async Task<Movie?> GetByIdAsync(Guid id, Guid? userId = null, CancellationToken cancellationToken = default) => 
+        await GetByConditionAsync("mvs.id = @Id", new { Id = id }, userId, cancellationToken);
 
-    public async Task<Movie?> GetBySlugAsync(string slug, CancellationToken cancellationToken = default) => 
-        await GetByConditionAsync("mvs.slug = @Slug", new { Slug = slug }, cancellationToken);
+    public async Task<Movie?> GetBySlugAsync(string slug, Guid? userId = null, CancellationToken cancellationToken = default) => 
+        await GetByConditionAsync("mvs.slug = @Slug", new { Slug = slug }, userId, cancellationToken);
 
     public async Task<bool> CreateAsync(Movie movie, CancellationToken cancellationToken = default)
     {
@@ -136,7 +136,7 @@ public class MoviesRepository : IMoviesRepository
         return result > 0;
     }
 
-    private async Task<Movie?> GetByConditionAsync(string sqlCondition, object parameters, CancellationToken cancellationToken = default)
+    private async Task<Movie?> GetByConditionAsync(string sqlCondition, object parameters, Guid? userId = null, CancellationToken cancellationToken = default)
     {
         var sql = $"""
                    SELECT mvs.*, string_agg(g.name, ',') as genres 

@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Movies.Api.Mapping;
+using Movies.Api.Auth;
+using Movies.Api.Mappings;
 using Movies.Application.Services;
 using Movies.Contracts.Requests;
 
@@ -20,9 +21,11 @@ namespace Movies.Api.Controllers
         [HttpGet(ApiEndpoints.Movies.Get)]
         public async Task<IActionResult> Get([FromRoute] string identifier, CancellationToken cancellationToken = default)
         {
+            var userId = HttpContext.GetUserId();
+            
             var movie = Guid.TryParse(identifier, out var id) 
-                ? await _service.GetByIdAsync(id, cancellationToken)
-                : await _service.GetBySlugAsync(identifier, cancellationToken);
+                ? await _service.GetByIdAsync(id, userId, cancellationToken)
+                : await _service.GetBySlugAsync(identifier, userId, cancellationToken);
 
             if (movie is null)
                 return NotFound();
@@ -33,7 +36,9 @@ namespace Movies.Api.Controllers
         [HttpGet(ApiEndpoints.Movies.GetAll)]
         public async Task<IActionResult> GetMoviesAsync(CancellationToken cancellationToken = default)
         {
-            var movies = await _service.GetAsync(cancellationToken);
+            var userId = HttpContext.GetUserId();
+            
+            var movies = await _service.GetAsync(userId, cancellationToken);
 
             return Ok(movies.MapToResponse());
         }

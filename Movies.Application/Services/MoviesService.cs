@@ -18,14 +18,14 @@ public class MoviesService : IMoviesService
         _repository = moviesService;
     }
 
-    public async Task<IEnumerable<Movie>> GetAsync(CancellationToken cancellationToken = default) => 
-        await _repository.GetAsync(cancellationToken);
+    public async Task<IEnumerable<Movie>> GetAsync(Guid? userId = null, CancellationToken cancellationToken = default) => 
+        await _repository.GetAsync(userId, cancellationToken);
 
-    public async Task<Movie?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default) => 
-        await _repository.GetByIdAsync(id, cancellationToken);
+    public async Task<Movie?> GetByIdAsync(Guid id, Guid? userId = null, CancellationToken cancellationToken = default) => 
+        await _repository.GetByIdAsync(id, userId, cancellationToken);
 
-    public async Task<Movie?> GetBySlugAsync(string slug, CancellationToken cancellationToken = default) =>
-        await _repository.GetBySlugAsync(slug, cancellationToken);
+    public async Task<Movie?> GetBySlugAsync(string slug, Guid? userId, CancellationToken cancellationToken = default) =>
+        await _repository.GetBySlugAsync(slug, userId, cancellationToken);
 
     public async Task<bool> CreateAsync(Movie movie, CancellationToken cancellationToken = default)
     {

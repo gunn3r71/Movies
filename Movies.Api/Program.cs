@@ -2,6 +2,7 @@ using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Localization;
 using Microsoft.IdentityModel.Tokens;
+using Movies.Api.Auth;
 using Movies.Api.Middlewares;
 using Movies.Application;
 using Movies.Application.Database.Initializers;
@@ -36,6 +37,8 @@ builder.Services.AddAuthentication(x =>
         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["Jwt:Key"]))
     };
 });
+
+builder.Services.AddAuthPolicies();
 
 var connectionString = configuration.GetConnectionString("DefaultConnection");
 

@@ -25,7 +25,7 @@ public class IdentityController : ControllerBase
             new(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
             new(JwtRegisteredClaimNames.Sub, request.Email),
             new(JwtRegisteredClaimNames.Email, request.Email),
-            new("userid", request.UserId.ToString())
+            new("userId", request.UserId.ToString())
         };
         
         foreach (var claimPair in request.CustomClaims)

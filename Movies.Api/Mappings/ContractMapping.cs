@@ -2,7 +2,7 @@
 using Movies.Contracts.Requests;
 using Movies.Contracts.Responses;
 
-namespace Movies.Api.Mapping
+namespace Movies.Api.Mappings
 {
     public static class ContractMapping
     {
@@ -22,13 +22,15 @@ namespace Movies.Api.Mapping
 
         public static MovieResponse MapToResponse(this Movie movie)
         {
-            return new MovieResponse()
+            return new MovieResponse
             {
                 Id = movie.Id,
                 Title = movie.Title,
                 Description = movie.Description,
                 YearOfRelease = movie.YearOfRelease,
                 Slug = movie.Slug,
+                UserRating = movie.UserRating,
+                Rating = movie.Rating,
                 Genres = movie.Genres
             };
         }

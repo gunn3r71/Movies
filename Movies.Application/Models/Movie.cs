@@ -19,8 +19,10 @@ namespace Movies.Application.Models
         public required string Description { get; set; }
         public string Slug => GenerateSlug();
         public required int YearOfRelease { get; set; }
+        public int? UserRating { get; set; }
+        public float Rating { get; set; }
         public List<string> Genres { get; private set; } = [];
-        
+
         private string GenerateSlug()
         {
             var sluggedTitle = SlugRegex().Replace(Title, string.Empty)
