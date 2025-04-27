@@ -44,7 +44,7 @@ public class RatingRepository : IRatingRepository
         
         using var connection = await _connectionFactory.CreateConnectionAsync(cancellationToken);
         
-        var result = await connection.QuerySingleAsync(new CommandDefinition(query, new { MovieId = movieId }, cancellationToken: cancellationToken));
+        var result = await connection.QuerySingleAsync(new CommandDefinition(query, new { UserId = userId, MovieId = movieId }, cancellationToken: cancellationToken));
 
         if (result == null)
             return (null, null);
