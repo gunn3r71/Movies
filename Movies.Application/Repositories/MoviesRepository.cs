@@ -24,15 +24,24 @@ public class MoviesRepository : IMoviesRepository
     public async Task<IEnumerable<Movie>> GetAsync(Guid? userId = null, CancellationToken cancellationToken = default)
     {
         const string sql = """
-                           SELECT mvs.*, string_agg(g.name, ',') as genres FROM Movies mvs
+                           SELECT mvs.*, 
+                                  string_agg(g.name, ',') as genres, 
+                                  avg(r.rating) as rating,
+                                  userRating.rating as userRating
+                           FROM Movies mvs
                             LEFT JOIN genres g
-                                ON mvs.Id = g.movie_id
+                                ON mvs.id = g.movie_id
+                            LEFT JOIN ratings r
+                                ON mvs.id = r.movie_id
+                            LEFT JOIN ratings userRating
+                                ON mvs.id = r.movie_id
+                                    and r.user_id = @UserId
                             GROUP BY mvs.id;
                            """;
 
         using var connection = await _connectionFactory.CreateConnectionAsync(cancellationToken);
         
-        var queryResult = await connection.QueryAsync(sql, cancellationToken);
+        var queryResult = await connection.QueryAsync(new CommandDefinition(sql, new {UserId = userId}, cancellationToken: cancellationToken));
 
         return queryResult.Select(x =>
         {
@@ -165,7 +174,9 @@ public class MoviesRepository : IMoviesRepository
         {
             Title = queryResult.title,
             Description = queryResult.description,
-            YearOfRelease = queryResult.year_of_release
+            YearOfRelease = queryResult.year_of_release,
+            UserRating = (byte?) queryResult.user_rating,
+            Rating = (float?) queryResult.rating
         };
         
         movie.Genres.AddRange(queryResult.genres.Split(','));

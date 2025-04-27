@@ -24,7 +24,7 @@ public class MoviesService : IMoviesService
     public async Task<Movie?> GetByIdAsync(Guid id, Guid? userId = null, CancellationToken cancellationToken = default) => 
         await _repository.GetByIdAsync(id, userId, cancellationToken);
 
-    public async Task<Movie?> GetBySlugAsync(string slug, Guid? userId, CancellationToken cancellationToken = default) =>
+    public async Task<Movie?> GetBySlugAsync(string slug, Guid? userId = null, CancellationToken cancellationToken = default) =>
         await _repository.GetBySlugAsync(slug, userId, cancellationToken);
 
     public async Task<bool> CreateAsync(Movie movie, CancellationToken cancellationToken = default)
