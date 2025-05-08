@@ -61,7 +61,9 @@ namespace Movies.Api.Controllers
         {
             var movie = request.MapToMovie(id);
 
-            var result = await _service.UpdateAsync(movie, cancellationToken);
+            var userId = HttpContext.GetUserId();
+            
+            var result = await _service.UpdateAsync(movie, userId, cancellationToken);
 
             if (result is null)
                 return NotFound();

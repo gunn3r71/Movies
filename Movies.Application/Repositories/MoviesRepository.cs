@@ -24,19 +24,23 @@ public class MoviesRepository : IMoviesRepository
     public async Task<IEnumerable<Movie>> GetAsync(Guid? userId = null, CancellationToken cancellationToken = default)
     {
         const string sql = """
-                           SELECT mvs.*, 
-                                  string_agg(g.name, ',') as genres, 
-                                  avg(r.rating) as rating,
-                                  userRating.rating as userRating
-                           FROM Movies mvs
-                            LEFT JOIN genres g
-                                ON mvs.id = g.movie_id
-                            LEFT JOIN ratings r
-                                ON mvs.id = r.movie_id
-                            LEFT JOIN ratings userRating
-                                ON mvs.id = r.movie_id
-                                    and r.user_id = @UserId
-                            GROUP BY mvs.id;
+                           SELECT 
+                               mvs.*,
+                               genres.genres,
+                               ROUND(AVG(r.rating), 1) AS rating,
+                               MAX(CASE WHEN r.user_id = @UserId THEN r.rating END) AS user_rating
+                           FROM 
+                               Movies mvs
+                           LEFT JOIN (
+                               SELECT 
+                                   g.movie_id, 
+                                   STRING_AGG(g.name, ',') AS genres
+                               FROM genres g
+                               GROUP BY g.movie_id
+                           ) genres ON mvs.id = genres.movie_id
+                           LEFT JOIN ratings r ON mvs.id = r.movie_id
+                           WHERE mvs.id = @MovieId
+                           GROUP BY mvs.id, r.rating;
                            """;
 
         using var connection = await _connectionFactory.CreateConnectionAsync(cancellationToken);
@@ -52,10 +56,10 @@ public class MoviesRepository : IMoviesRepository
     }
 
     public async Task<Movie?> GetByIdAsync(Guid id, Guid? userId = null, CancellationToken cancellationToken = default) => 
-        await GetByConditionAsync("mvs.id = @Id", new { Id = id }, userId, cancellationToken);
+        await GetByConditionAsync("mvs.id = @Id", new { Id = id, UserId = userId }, cancellationToken);
 
     public async Task<Movie?> GetBySlugAsync(string slug, Guid? userId = null, CancellationToken cancellationToken = default) => 
-        await GetByConditionAsync("mvs.slug = @Slug", new { Slug = slug }, userId, cancellationToken);
+        await GetByConditionAsync("mvs.slug = @Slug", new { Slug = slug, UserId = userId }, cancellationToken);
 
     public async Task<bool> CreateAsync(Movie movie, CancellationToken cancellationToken = default)
     {
@@ -145,18 +149,30 @@ public class MoviesRepository : IMoviesRepository
         return result > 0;
     }
 
-    private async Task<Movie?> GetByConditionAsync(string sqlCondition, object parameters, Guid? userId = null, CancellationToken cancellationToken = default)
+    private async Task<Movie?> GetByConditionAsync(string sqlCondition, object parameters, CancellationToken cancellationToken = default)
     {
-        var sql = $"""
-                   SELECT mvs.*, string_agg(g.name, ',') as genres 
-                   FROM Movies mvs
-                   LEFT JOIN genres g ON mvs.id = g.movie_id
-                   WHERE {sqlCondition}
-                   GROUP BY mvs.id;
-                   """;
-        
         ArgumentException.ThrowIfNullOrEmpty(sqlCondition, nameof(sqlCondition));
         ArgumentNullException.ThrowIfNull(parameters, nameof(parameters));
+     
+        var sql = $"""
+                   SELECT 
+                       mvs.*,
+                       genres.genres,
+                       ROUND(AVG(r.rating), 1) AS rating,
+                       MAX(CASE WHEN r.user_id = @UserId THEN r.rating END) AS user_rating
+                   FROM 
+                       Movies mvs
+                   LEFT JOIN (
+                       SELECT 
+                           g.movie_id, 
+                           STRING_AGG(g.name, ',') AS genres
+                       FROM genres g
+                       GROUP BY g.movie_id
+                   ) genres ON mvs.id = genres.movie_id
+                   LEFT JOIN ratings r ON mvs.id = r.movie_id
+                   WHERE {sqlCondition}
+                   GROUP BY mvs.id, r.rating, genres.genres;
+                   """;
         
         using var connection = await _connectionFactory.CreateConnectionAsync(cancellationToken);
         

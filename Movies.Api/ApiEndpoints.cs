@@ -21,7 +21,7 @@
         {
             private const string Base = $"{ApiBase}/ratings";
             
-            public const string GetUserRating = $"{Base}/{{user:guid}}/me";
+            public const string GetUserRating = $"{Base}/me";
         }
     }
 }

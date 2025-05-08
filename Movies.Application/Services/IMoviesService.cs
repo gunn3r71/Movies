@@ -8,6 +8,6 @@ public interface IMoviesService
     Task<Movie?> GetByIdAsync(Guid id, Guid? userId = null, CancellationToken cancellationToken = default);
     Task<Movie?> GetBySlugAsync(string slug, Guid? userId = null, CancellationToken cancellationToken = default);
     Task<bool> CreateAsync(Movie movie, CancellationToken cancellationToken = default);
-    Task<Movie?> UpdateAsync(Movie movie, CancellationToken cancellationToken = default);
+    Task<Movie?> UpdateAsync(Movie movie, Guid? userId = null, CancellationToken cancellationToken = default);
     Task<bool> DeleteAsync(Guid id, CancellationToken cancellationToken = default);
 }
